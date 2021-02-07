@@ -32,3 +32,18 @@ TEST_CASE("Comma-separated strings")
     REQUIRE(iterator.delimiter().empty());
     REQUIRE(iterator.remaining_substring().empty());
 }
+
+TEST_CASE("String ends on delimiter")
+{
+    std::string text = "Abc, def.";
+    StringDelimiterIterator iterator(text, FindSequenceOf(" ,."));
+    REQUIRE(iterator.next());
+    REQUIRE(iterator.preceding_substring() == "Abc");
+    REQUIRE(iterator.delimiter() == ", ");
+    REQUIRE(iterator.remaining_substring() == "def.");
+    REQUIRE(iterator.next());
+    REQUIRE(iterator.preceding_substring() == "def");
+    REQUIRE(iterator.delimiter() == ".");
+    REQUIRE(iterator.remaining_substring().empty());
+    REQUIRE(!iterator.next());
+}

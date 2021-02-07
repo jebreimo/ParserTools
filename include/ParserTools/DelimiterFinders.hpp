@@ -34,12 +34,12 @@ namespace ParserTools
         std::string_view m_Substring;
     };
 
-    struct FindCharSequence
+    struct FindSequenceOf
     {
     public:
-        FindCharSequence() = default;
+        FindSequenceOf() = default;
 
-        FindCharSequence(std::string_view characters)
+        FindSequenceOf(std::string_view characters)
             : m_Characters(characters)
         {}
 

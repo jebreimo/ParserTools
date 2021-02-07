@@ -17,7 +17,7 @@ TEST_CASE("False end of sequence at end of buffer")
 {
     std::string str = "ABCDEFGHIJ . . .BCDEFGHIJK";
     std::stringstream ss(str);
-    StreamDelimiterIterator iterator(ss, FindCharSequence(" ."), 12);
+    StreamDelimiterIterator iterator(ss, FindSequenceOf(" ."), 12);
     REQUIRE(iterator.next());
     REQUIRE(iterator.preceding_substring() == "ABCDEFGHIJ");
     REQUIRE(iterator.delimiter() == " . . .");
