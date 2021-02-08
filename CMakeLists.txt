@@ -27,7 +27,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
 
-add_library(ParserTools INTERFACE)
+add_library(ParserTools INTERFACE
+    )
 
 target_include_directories(ParserTools
     INTERFACE
@@ -49,7 +50,7 @@ export(TARGETS ParserTools
 if (PARSERTOOLS_INSTALL)
     install(
         DIRECTORY
-            include/ParserTools
+            include/
         DESTINATION
             ${CMAKE_INSTALL_INCLUDEDIR}
         )

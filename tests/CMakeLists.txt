@@ -20,7 +20,10 @@ endif ()
 
 add_executable(ParserToolsTest
     ParserToolsTest.cpp
-    test_StringDelimiterIterator.cpp test_StreamDelimiterIterator.cpp)
+    test_StreamDelimiterIterator.cpp
+    test_StringDelimiterIterator.cpp
+    test_StringTokenizer.cpp
+    )
 
 target_link_libraries(ParserToolsTest
     PRIVATE
