@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.17)
-project(ParserTools VERSION 0.1.0)
+project(ParserTools VERSION 0.1.1)
 
 # Set PARSERTOOLS_MASTER_PROJECT to ON if ParserTools is the root level project.
 if (NOT DEFINED PARSERTOOLS_MASTER_PROJECT)
@@ -27,8 +27,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(GNUInstallDirs)
 
-add_library(ParserTools INTERFACE
-    )
+add_library(ParserTools INTERFACE)
 
 target_include_directories(ParserTools
     INTERFACE

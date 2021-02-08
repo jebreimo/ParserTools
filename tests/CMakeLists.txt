@@ -23,7 +23,7 @@ add_executable(ParserToolsTest
     test_StreamDelimiterIterator.cpp
     test_StringDelimiterIterator.cpp
     test_StringTokenizer.cpp
-    )
+    test_StreamTokenizer.cpp)
 
 target_link_libraries(ParserToolsTest
     PRIVATE
