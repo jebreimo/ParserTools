@@ -34,6 +34,24 @@ namespace ParserTools
         std::string_view m_Substring;
     };
 
+    struct FindNewline
+    {
+    public:
+        std::pair<size_t, size_t> operator()(std::string_view str) const
+        {
+            auto from = find_if(str.begin(), str.end(),
+                                [](char c){return c == '\n' || c == '\r';});
+            auto to = from;
+            if (to != str.end())
+            {
+                if (*to++ == '\r' && to != str.end() && *to == '\n')
+                    ++to;
+            }
+            return {std::distance(str.begin(), from),
+                    std::distance(str.begin(), to)};
+        }
+    };
+
     struct FindSequenceOf
     {
     public:
