@@ -23,13 +23,13 @@ TEST_CASE("Stuff")
         switch (i)
         {
         case 0:
-            REQUIRE(*item == "ABCDEFGHIJ");
+            REQUIRE(item.string() == "ABCDEFGHIJ");
             break;
         case 1:
-            REQUIRE(*item == "BCDEFGHIJK");
+            REQUIRE(item.string() == "BCDEFGHIJK");
             break;
         case 2:
-            REQUIRE((*item).empty());
+            REQUIRE(item.string().empty());
             break;
         default:
             FAIL("Too many tokens!");

@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <cassert>
 #include <istream>
 #include <string_view>
 
@@ -29,11 +30,6 @@ namespace ParserTools
         explicit constexpr operator bool() const
         {
             return !m_Str.empty();
-        }
-
-        constexpr std::string_view operator*() const
-        {
-            return m_Str.substr(0, m_TokenStart);
         }
 
         [[nodiscard]]
@@ -74,9 +70,9 @@ namespace ParserTools
     class StreamBuffer
     {
     public:
-        StreamBuffer() = default;
+        constexpr StreamBuffer() = default;
 
-        explicit StreamBuffer(std::istream* stream)
+        explicit constexpr StreamBuffer(std::istream* stream)
             : m_Stream(stream)
         {}
 
@@ -104,12 +100,12 @@ namespace ParserTools
         }
 
         [[nodiscard]]
-        std::string_view string() const
+        constexpr std::string_view string() const
         {
             return {m_Buffer.get() + m_Offset, m_Size - m_Offset};
         }
 
-        void consume(size_t size)
+        constexpr void consume(size_t size)
         {
             m_Offset += size;
         }
@@ -223,9 +219,7 @@ namespace ParserTools
                         FindDelimiterFunc findDelimiterFunc)
             : m_Stream(&stream),
               m_FindDelimiterFunc(findDelimiterFunc)
-        {
-            using std::move;
-        }
+        {}
 
         StreamTokenizerIterator<FindDelimiterFunc> begin()
         {

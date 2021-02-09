@@ -6,6 +6,7 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #pragma once
+#include <cassert>
 #include <string_view>
 #include <vector>
 
@@ -29,11 +30,6 @@ namespace ParserTools
         explicit constexpr operator bool() const
         {
             return !m_Str.empty();
-        }
-
-        constexpr std::string_view operator*() const
-        {
-            return m_Str.substr(0, m_TokenStart);
         }
 
         [[nodiscard]]

@@ -6,7 +6,7 @@
 # License text is included with the source distribution.
 # ===========================================================================
 cmake_minimum_required(VERSION 3.17)
-project(ParserTools VERSION 0.1.1)
+project(ParserTools VERSION 0.2.0)
 
 # Set PARSERTOOLS_MASTER_PROJECT to ON if ParserTools is the root level project.
 if (NOT DEFINED PARSERTOOLS_MASTER_PROJECT)

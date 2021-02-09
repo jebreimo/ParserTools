@@ -20,13 +20,13 @@ TEST_CASE("StringTokenizer on comma-separated strings")
         switch (i)
         {
         case 0:
-            REQUIRE(*token == "Abc");
+            REQUIRE(token.string() == "Abc");
             break;
         case 1:
-            REQUIRE(*token == "def");
+            REQUIRE(token.string() == "def");
             break;
         case 2:
-            REQUIRE(*token == "ghi");
+            REQUIRE(token.string() == "ghi");
             break;
         default:
             FAIL("Too many tokens!");
