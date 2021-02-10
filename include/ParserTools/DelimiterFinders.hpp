@@ -8,6 +8,7 @@
 #pragma once
 #include <algorithm>
 #include <string_view>
+#include <cctype>
 
 namespace ParserTools
 {
@@ -47,6 +48,26 @@ namespace ParserTools
                 if (*to++ == '\r' && to != str.end() && *to == '\n')
                     ++to;
             }
+            return {std::distance(str.begin(), from),
+                    std::distance(str.begin(), to)};
+        }
+    };
+
+    struct FindWhitespace
+    {
+    public:
+        std::pair<size_t, size_t> operator()(std::string_view str) const
+        {
+            auto from = find_if(str.begin(), str.end(), [](char c)
+            {
+                return isspace(c) != 0;
+            });
+
+            auto to = find_if(from, str.end(), [](char c)
+            {
+              return isspace(c) == 0;
+            });
+
             return {std::distance(str.begin(), from),
                     std::distance(str.begin(), to)};
         }
