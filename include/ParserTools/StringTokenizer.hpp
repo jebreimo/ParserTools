@@ -163,12 +163,22 @@ namespace ParserTools
 
     template <typename FindDelimiterFunc>
     std::vector<std::string_view>
-    split(std::string_view str, FindDelimiterFunc findDelimiterFunc)
+    split(std::string_view str, FindDelimiterFunc findDelimiterFunc, size_t maxSplits = SIZE_MAX)
     {
+        if (maxSplits == 0)
+          return {str};
+
         using std::move;
         std::vector<std::string_view> result;
         for (auto item : tokenize(str, move(findDelimiterFunc)))
+        {
             result.push_back(*item);
+            if (--maxSplits == 0)
+            {
+              result.push_back(item.remainder());
+              break;
+            }
+        }
         return result;
     }
 }
