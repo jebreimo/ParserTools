@@ -172,7 +172,7 @@ namespace ParserTools
         std::vector<std::string_view> result;
         for (auto item : tokenize(str, move(findDelimiterFunc)))
         {
-            result.push_back(*item);
+            result.push_back(item->string());
             if (--maxSplits == 0)
             {
               result.push_back(item.remainder());
