@@ -34,3 +34,15 @@ TEST_CASE("StringTokenizer on comma-separated strings")
         ++i;
     }
 }
+
+TEST_CASE("string is empty")
+{
+    StringTokenizer tokenizer({}, FindNewline());
+    REQUIRE(std::distance(tokenizer.begin(), tokenizer.end()) == 0);
+}
+
+TEST_CASE("Non-empty string without tokens")
+{
+    StringTokenizer tokenizer("foo", FindNewline());
+    REQUIRE(std::distance(tokenizer.begin(), tokenizer.end()) == 1);
+}

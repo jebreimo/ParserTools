@@ -147,9 +147,9 @@ namespace ParserTools
     {
     public:
         using difference_type = void;
-        using value = StreamTokenizerItem;
-        using reference = const value&;
-        using pointer = const value*;
+        using value_type = StreamTokenizerItem;
+        using reference = const value_type&;
+        using pointer = const value_type*;
         using iterator_category = std::input_iterator_tag;
 
         constexpr StreamTokenizerIterator() = default;

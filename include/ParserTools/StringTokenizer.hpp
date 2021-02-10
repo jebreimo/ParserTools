@@ -74,10 +74,10 @@ namespace ParserTools
     class StringTokenizerIterator
     {
     public:
-        using difference_type = void;
-        using value = StreamTokenizerItem;
-        using reference = const value&;
-        using pointer = const value*;
+        using difference_type = ptrdiff_t;
+        using value_type = StreamTokenizerItem;
+        using reference = const value_type&;
+        using pointer = const value_type*;
         using iterator_category = std::forward_iterator_tag;
 
         constexpr StringTokenizerIterator() = default;
