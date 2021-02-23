@@ -21,6 +21,7 @@ endif ()
 add_executable(ParserToolsTest
     ParserToolsTest.cpp
     test_DelimiterFinders.cpp
+    test_ParseDouble.cpp
     test_StreamDelimiterIterator.cpp
     test_StreamTokenizer.cpp
     test_StringDelimiterIterator.cpp
