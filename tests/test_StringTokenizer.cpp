@@ -46,3 +46,23 @@ TEST_CASE("Non-empty string without tokens")
     StringTokenizer tokenizer("foo", FindNewline());
     REQUIRE(std::distance(tokenizer.begin(), tokenizer.end()) == 1);
 }
+
+TEST_CASE("Test split")
+{
+    auto parts = split("abc\ndef\r\nghijkl\rmnopq\n\r", FindNewline());
+    REQUIRE(parts.size() == 6);
+    REQUIRE(parts[0] == "abc");
+    REQUIRE(parts[1] == "def");
+    REQUIRE(parts[2] == "ghijkl");
+    REQUIRE(parts[3] == "mnopq");
+    REQUIRE(parts[4].empty());
+    REQUIRE(parts[5].empty());
+}
+
+TEST_CASE("Split with non-empty end.")
+{
+    auto parts = split("abc, def", FindSequenceOf(" ,"));
+    REQUIRE(parts.size() == 2);
+    REQUIRE(parts[0] == "abc");
+    REQUIRE(parts[1] == "def");
+}
