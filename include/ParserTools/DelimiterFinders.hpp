@@ -17,7 +17,7 @@ namespace ParserTools
     public:
         FindSubstring() = default;
 
-        FindSubstring(std::string_view str)
+        explicit FindSubstring(std::string_view str)
             : m_Substring(str)
         {}
 
@@ -40,13 +40,13 @@ namespace ParserTools
     public:
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
-            auto from = find_if(str.begin(), str.end(),
-                                [](char c){return c == '\n' || c == '\r';});
+            auto from = std::find_if(str.begin(), str.end(),
+                                     [](char c){return c == '\n' || c == '\r';});
             auto to = from;
-            if (to != str.end())
+            if (to != str.end() && *to++ == '\r'
+                && to != str.end() && *to == '\n')
             {
-                if (*to++ == '\r' && to != str.end() && *to == '\n')
-                    ++to;
+                ++to;
             }
             return {std::distance(str.begin(), from),
                     std::distance(str.begin(), to)};
@@ -58,12 +58,12 @@ namespace ParserTools
     public:
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
-            auto from = find_if(str.begin(), str.end(), [](char c)
+            auto from = std::find_if(str.begin(), str.end(), [](char c)
             {
                 return isspace(c) != 0;
             });
 
-            auto to = find_if(from, str.end(), [](char c)
+            auto to = std::find_if(from, str.end(), [](char c)
             {
               return isspace(c) == 0;
             });
@@ -78,7 +78,7 @@ namespace ParserTools
     public:
         FindSequenceOf() = default;
 
-        FindSequenceOf(std::string_view characters)
+        explicit FindSequenceOf(std::string_view characters)
             : m_Characters(characters)
         {}
 
