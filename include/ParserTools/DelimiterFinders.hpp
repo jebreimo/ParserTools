@@ -25,7 +25,7 @@ namespace ParserTools
             if (m_Substring.empty())
                 return {str.size(), str.size()};
             const auto it = std::search(str.begin(), str.end(),
-                                  m_Substring.begin(), m_Substring.end());
+                                        m_Substring.begin(), m_Substring.end());
             auto start = std::distance(str.begin(), it);
             auto end = it != str.end() ? start + m_Substring.size() : start;
             return {start, end};
@@ -39,18 +39,18 @@ namespace ParserTools
         FindChar() = default;
 
         explicit FindChar(char ch)
-            : m_Char(ch)
+            : char_(ch)
         {}
 
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
-            const auto it = std::find(str.begin(), str.end(), m_Char);
+            const auto it = std::find(str.begin(), str.end(), char_);
             auto start = std::distance(str.begin(), it);
             auto end = it != str.end() ? start + 1 : start;
             return {start, end};
         }
     private:
-        char m_Char = '\0';
+        char char_ = '\0';
     };
 
     struct FindNewline
@@ -59,7 +59,7 @@ namespace ParserTools
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
             const auto from = std::find_if(str.begin(), str.end(),
-                    [](char c){return c == '\n' || c == '\r';});
+                                           [](char c){return c == '\n' || c == '\r';});
             auto to = from;
             if (to != str.end() && *to++ == '\r'
                 && to != str.end() && *to == '\n')
