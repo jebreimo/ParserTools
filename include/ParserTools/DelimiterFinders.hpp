@@ -14,7 +14,6 @@ namespace ParserTools
 {
     struct FindSubstring
     {
-    public:
         FindSubstring() = default;
 
         explicit FindSubstring(std::string_view str)
@@ -25,7 +24,7 @@ namespace ParserTools
         {
             if (m_Substring.empty())
                 return {str.size(), str.size()};
-            auto it = std::search(str.begin(), str.end(),
+            const auto it = std::search(str.begin(), str.end(),
                                   m_Substring.begin(), m_Substring.end());
             auto start = std::distance(str.begin(), it);
             auto end = it != str.end() ? start + m_Substring.size() : start;
@@ -35,13 +34,32 @@ namespace ParserTools
         std::string_view m_Substring;
     };
 
+    struct FindChar
+    {
+        FindChar() = default;
+
+        explicit FindChar(char ch)
+            : m_Char(ch)
+        {}
+
+        std::pair<size_t, size_t> operator()(std::string_view str) const
+        {
+            const auto it = std::find(str.begin(), str.end(), m_Char);
+            auto start = std::distance(str.begin(), it);
+            auto end = it != str.end() ? start + 1 : start;
+            return {start, end};
+        }
+    private:
+        char m_Char = '\0';
+    };
+
     struct FindNewline
     {
     public:
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
-            auto from = std::find_if(str.begin(), str.end(),
-                                     [](char c){return c == '\n' || c == '\r';});
+            const auto from = std::find_if(str.begin(), str.end(),
+                    [](char c){return c == '\n' || c == '\r';});
             auto to = from;
             if (to != str.end() && *to++ == '\r'
                 && to != str.end() && *to == '\n')
@@ -55,7 +73,6 @@ namespace ParserTools
 
     struct FindWhitespace
     {
-    public:
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
             auto from = std::find_if(str.begin(), str.end(), [](char c)
@@ -75,7 +92,6 @@ namespace ParserTools
 
     struct FindSequenceOf
     {
-    public:
         FindSequenceOf() = default;
 
         explicit FindSequenceOf(std::string_view characters)
