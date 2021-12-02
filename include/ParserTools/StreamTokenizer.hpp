@@ -159,7 +159,9 @@ namespace ParserTools
             : m_Buffer(&stream),
               m_FindDelimiterFunc(findFunc)
         {
+            bool isFirst = bool(stream);
             operator++();
+            m_IsFirst = isFirst;
         }
 
         const StreamTokenizerItem& operator*() const
@@ -184,6 +186,7 @@ namespace ParserTools
                     break;
                 }
             }
+            m_IsFirst = false;
             return *this;
         }
 
@@ -196,7 +199,7 @@ namespace ParserTools
         friend constexpr bool
         operator==(const StreamTokenizerIterator& a, const StreamTokenizerIterator& b)
         {
-            return !a.m_Item && !b.m_Item;
+            return a.m_IsFirst == b.m_IsFirst && !a.m_Item && !b.m_Item;
         }
 
         friend constexpr bool
@@ -209,6 +212,7 @@ namespace ParserTools
         StreamTokenizerItem m_Item;
         StreamBuffer m_Buffer;
         FindDelimiterFunc m_FindDelimiterFunc;
+        bool m_IsFirst = false;
     };
 
     template <typename FindDelimiterFunc>

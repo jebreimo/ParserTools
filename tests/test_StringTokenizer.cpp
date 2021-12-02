@@ -38,7 +38,7 @@ TEST_CASE("StringTokenizer on comma-separated strings")
 TEST_CASE("string is empty")
 {
     StringTokenizer tokenizer({}, FindNewline());
-    REQUIRE(std::distance(tokenizer.begin(), tokenizer.end()) == 0);
+    REQUIRE(std::distance(tokenizer.begin(), tokenizer.end()) == 1);
 }
 
 TEST_CASE("Non-empty string without tokens")
@@ -65,4 +65,11 @@ TEST_CASE("Split with non-empty end.")
     REQUIRE(parts.size() == 2);
     REQUIRE(parts[0] == "abc");
     REQUIRE(parts[1] == "def");
+}
+
+TEST_CASE("Split empty string.")
+{
+    auto parts = split("", FindChar(','));
+    REQUIRE(parts.size() == 1);
+    REQUIRE(parts[0] == "");
 }

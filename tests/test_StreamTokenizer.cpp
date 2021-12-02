@@ -13,7 +13,7 @@
 
 using namespace ParserTools;
 
-TEST_CASE("Stuff")
+TEST_CASE("Tokenize a stream")
 {
     std::string str = "ABCDEFGHIJ . . .BCDEFGHIJK . ";
     std::stringstream ss(str);
@@ -36,4 +36,16 @@ TEST_CASE("Stuff")
         }
         ++i;
     }
+}
+
+TEST_CASE("Tokenize an empty stream")
+{
+    std::string str = "";
+    std::stringstream ss(str);
+    int i = 0;
+    for (auto item : tokenize(ss, FindSequenceOf(" .")))
+    {
+        ++i;
+    }
+    REQUIRE(i == 1);
 }

@@ -12,12 +12,12 @@
 
 namespace ParserTools
 {
-    class StreamTokenizerItem
+    class StringTokenizerItem
     {
     public:
-        constexpr StreamTokenizerItem() = default;
+        constexpr StringTokenizerItem() = default;
 
-        constexpr StreamTokenizerItem(std::string_view str,
+        constexpr StringTokenizerItem(std::string_view str,
                                       size_t tokenStart, size_t tokenEnd)
             : m_Str(str),
               m_TokenStart(tokenStart),
@@ -51,7 +51,7 @@ namespace ParserTools
         }
 
         friend constexpr bool
-        operator==(const StreamTokenizerItem& a, const StreamTokenizerItem& b)
+        operator==(const StringTokenizerItem& a, const StringTokenizerItem& b)
         {
             return a.m_TokenStart == b.m_TokenStart
                    && a.m_TokenEnd == b.m_TokenEnd
@@ -60,7 +60,7 @@ namespace ParserTools
         }
 
         friend constexpr bool
-        operator!=(const StreamTokenizerItem& a, const StreamTokenizerItem& b)
+        operator!=(const StringTokenizerItem& a, const StringTokenizerItem& b)
         {
             return !(a == b);
         }
@@ -75,7 +75,7 @@ namespace ParserTools
     {
     public:
         using difference_type = ptrdiff_t;
-        using value_type = StreamTokenizerItem;
+        using value_type = StringTokenizerItem;
         using reference = const value_type&;
         using pointer = const value_type*;
         using iterator_category = std::forward_iterator_tag;
@@ -84,18 +84,19 @@ namespace ParserTools
 
         constexpr StringTokenizerIterator(std::string_view str,
                                           FindDelimiterFunc findFunc)
-            : m_FindDelimiterFunc(findFunc)
+            : m_FindDelimiterFunc(findFunc),
+              m_IsFirst(true)
         {
             auto[s, e] = m_FindDelimiterFunc(str);
             m_Item = {str, s, e};
         }
 
-        const StreamTokenizerItem& operator*() const
+        const StringTokenizerItem& operator*() const
         {
             return m_Item;
         }
 
-        const StreamTokenizerItem* operator->() const
+        const StringTokenizerItem* operator->() const
         {
             return &m_Item;
         }
@@ -104,6 +105,7 @@ namespace ParserTools
         {
             auto[s, e] = m_FindDelimiterFunc(m_Item.remainder());
             m_Item = {m_Item.remainder(), s, e};
+            m_IsFirst = false;
             return *this;
         }
 
@@ -112,12 +114,13 @@ namespace ParserTools
             auto prev = *this;
             auto[s, e] = m_FindDelimiterFunc(m_Item.remainder());
             m_Item = {m_Item.remainder(), s, e};
+            m_IsFirst = false;
             return prev;
         }
 
         friend constexpr bool operator==(const StringTokenizerIterator& a, const StringTokenizerIterator& b)
         {
-            return (!a.m_Item && !b.m_Item) || (a.m_Item == b.m_Item);
+            return a.m_IsFirst == b.m_IsFirst && ((!a.m_Item && !b.m_Item) || (a.m_Item == b.m_Item));
         }
 
         friend constexpr bool operator!=(const StringTokenizerIterator& a, const StringTokenizerIterator& b)
@@ -125,8 +128,9 @@ namespace ParserTools
             return !(a == b);
         }
     private:
-        StreamTokenizerItem m_Item;
+        StringTokenizerItem m_Item;
         FindDelimiterFunc m_FindDelimiterFunc;
+        bool m_IsFirst = false;
     };
 
     template <typename FindDelimiterFunc>
