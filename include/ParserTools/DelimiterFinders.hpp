@@ -17,21 +17,21 @@ namespace ParserTools
         FindSubstring() = default;
 
         explicit FindSubstring(std::string_view str)
-            : m_Substring(str)
+            : substring_(str)
         {}
 
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
-            if (m_Substring.empty())
+            if (substring_.empty())
                 return {str.size(), str.size()};
-            const auto it = std::search(str.begin(), str.end(),
-                                        m_Substring.begin(), m_Substring.end());
+            auto it = std::search(str.begin(), str.end(),
+                                  substring_.begin(), substring_.end());
             auto start = std::distance(str.begin(), it);
-            auto end = it != str.end() ? start + m_Substring.size() : start;
+            auto end = it != str.end() ? start + substring_.size() : start;
             return {start, end};
         }
     private:
-        std::string_view m_Substring;
+        std::string_view substring_;
     };
 
     struct FindChar
@@ -58,8 +58,8 @@ namespace ParserTools
     public:
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
-            const auto from = std::find_if(str.begin(), str.end(),
-                                           [](char c){return c == '\n' || c == '\r';});
+            auto from = std::find_if(str.begin(), str.end(),
+                                     [](char c){return c == '\n' || c == '\r';});
             auto to = from;
             if (to != str.end() && *to++ == '\r'
                 && to != str.end() && *to == '\n')
@@ -95,16 +95,16 @@ namespace ParserTools
         FindSequenceOf() = default;
 
         explicit FindSequenceOf(std::string_view characters)
-            : m_Characters(characters)
+            : characters_(characters)
         {}
 
         std::pair<size_t, size_t> operator()(std::string_view str) const
         {
             auto match = [this](char c)
                 {
-                    return std::find(m_Characters.begin(),
-                                     m_Characters.end(),
-                                     c) != m_Characters.end();
+                    return std::find(characters_.begin(),
+                                     characters_.end(),
+                                     c) != characters_.end();
                 };
             auto from = std::find_if(str.begin(), str.end(), match);
             auto to = std::find_if_not(from, str.end(), match);
@@ -113,6 +113,6 @@ namespace ParserTools
         }
 
     private:
-        std::string_view m_Characters;
+        std::string_view characters_;
     };
 }

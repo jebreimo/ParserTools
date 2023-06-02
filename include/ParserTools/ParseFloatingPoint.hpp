@@ -16,14 +16,14 @@ namespace ParserTools
 {
     namespace Details
     {
-        int getDigit(char c)
+        int get_digit(char c)
         {
             return int(uint8_t(c) ^ 0x30u);
         }
     }
 
     template <typename T>
-    std::optional<T> parseFloatingPoint(std::string_view str)
+    std::optional<T> parse_floating_point(std::string_view str)
     {
         if (str.empty())
             return {};
@@ -44,7 +44,7 @@ namespace ParserTools
         }
 
         // Get the integer value
-        auto value = T(Details::getDigit(str[i]));
+        auto value = T(Details::get_digit(str[i]));
         if (value > 9)
         {
             if (str == "Infinity" || str == "null" || str == "+Infinity")
@@ -59,7 +59,7 @@ namespace ParserTools
         bool underscore = false;
         for (++i; i < str.size(); ++i)
         {
-            auto digit = Details::getDigit(str[i]);
+            auto digit = Details::get_digit(str[i]);
             if (digit <= 9)
             {
                 value *= 10;
@@ -90,7 +90,7 @@ namespace ParserTools
         {
             for (++i; i < str.size(); ++i)
             {
-                auto digit = Details::getDigit(str[i]);
+                auto digit = Details::get_digit(str[i]);
                 if (digit <= 9)
                 {
                     fraction *= 10;
@@ -119,10 +119,10 @@ namespace ParserTools
             if (++i == str.size())
                 return {};
 
-            bool negativeExponent = false;
+            bool negative_exponent = false;
             if (str[i] == '-')
             {
-                negativeExponent = true;
+                negative_exponent = true;
                 if (++i == str.size())
                     return {};
             }
@@ -132,13 +132,13 @@ namespace ParserTools
                     return {};
             }
 
-            exponent += Details::getDigit(str[i]);
+            exponent += Details::get_digit(str[i]);
             if (exponent > 9)
                 return {};
 
             for (++i; i != str.size(); ++i)
             {
-                auto digit = Details::getDigit(str[i]);
+                auto digit = Details::get_digit(str[i]);
                 if (digit <= 9)
                 {
                     exponent *= 10;
@@ -156,7 +156,7 @@ namespace ParserTools
                 if (exponent > std::numeric_limits<T>::max_exponent10)
                     return {};
             }
-            if (negativeExponent)
+            if (negative_exponent)
                 exponent = -exponent;
         }
 

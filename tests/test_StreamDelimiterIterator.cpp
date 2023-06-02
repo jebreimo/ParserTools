@@ -13,7 +13,7 @@
 
 using namespace ParserTools;
 
-TEST_CASE("False end of sequence at end of buffer")
+TEST_CASE("False end of sequence at end of buffer_")
 {
     std::string str = "ABCDEFGHIJ . . .BCDEFGHIJK";
     std::stringstream ss(str);

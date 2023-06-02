@@ -18,39 +18,39 @@ namespace ParserTools
         constexpr StreamTokenizerItem() = default;
 
         constexpr StreamTokenizerItem(std::string_view str,
-                                      size_t tokenStart, size_t tokenEnd)
-            : m_Str(str),
-              m_TokenStart(tokenStart),
-              m_TokenEnd(tokenEnd)
+                                      size_t token_start, size_t token_end)
+            : str_(str),
+              token_start_(token_start),
+              token_end_(token_end)
         {
-            assert(tokenStart <= tokenEnd);
-            assert(tokenEnd <= str.size());
+            assert(token_start <= token_end);
+            assert(token_end <= str.size());
         }
 
         explicit constexpr operator bool() const
         {
-            return !m_Str.empty();
+            return !str_.empty();
         }
 
         [[nodiscard]]
         constexpr std::string_view string() const
         {
-            return m_Str.substr(0, m_TokenStart);
+            return str_.substr(0, token_start_);
         }
 
         [[nodiscard]]
         constexpr std::string_view token() const
         {
-            return m_Str.substr(m_TokenStart, m_TokenEnd - m_TokenStart);
+            return str_.substr(token_start_, token_end_ - token_start_);
         }
 
         friend constexpr bool
         operator==(const StreamTokenizerItem& a, const StreamTokenizerItem& b)
         {
-            return a.m_TokenStart == b.m_TokenStart
-                   && a.m_TokenEnd == b.m_TokenEnd
-                   && a.m_Str.data() == b.m_Str.data()
-                   && a.m_Str.size() == b.m_Str.size();
+            return a.token_start_ == b.token_start_
+                   && a.token_end_ == b.token_end_
+                   && a.str_.data() == b.str_.data()
+                   && a.str_.size() == b.str_.size();
         }
 
         friend constexpr bool
@@ -60,9 +60,9 @@ namespace ParserTools
         }
 
     private:
-        std::string_view m_Str;
-        size_t m_TokenStart = 0;
-        size_t m_TokenEnd = 0;
+        std::string_view str_;
+        size_t token_start_ = 0;
+        size_t token_end_ = 0;
     };
 
     constexpr size_t DEFAULT_STREAM_BUFFER_CAPACITY = 64 * 1024;
@@ -73,73 +73,73 @@ namespace ParserTools
         constexpr StreamBuffer() = default;
 
         explicit constexpr StreamBuffer(std::istream* stream)
-            : m_Stream(stream)
+            : stream_(stream)
         {}
 
         StreamBuffer(StreamBuffer&& other) noexcept
-            : m_Stream(other.m_Stream),
-              m_Buffer(move(other.m_Buffer)),
-              m_Offset(other.m_Offset),
-              m_Size(other.m_Size),
-              m_Capacity(other.m_Capacity)
+            : stream_(other.stream_),
+              buffer_(move(other.buffer_)),
+              offset_(other.offset_),
+              size_(other.size_),
+              capacity_(other.capacity_)
         {
-            other.m_Stream = nullptr;
-            other.m_Offset = other.m_Size = other.m_Capacity = 0;
+            other.stream_ = nullptr;
+            other.offset_ = other.size_ = other.capacity_ = 0;
         }
 
         StreamBuffer& operator=(StreamBuffer&& other) noexcept
         {
-            m_Stream = other.m_Stream;
-            m_Buffer = move(other.m_Buffer);
-            m_Offset = other.m_Offset;
-            m_Size = other.m_Size;
-            m_Capacity = other.m_Capacity;
-            other.m_Stream = nullptr;
-            other.m_Offset = other.m_Size = other.m_Capacity = 0;
+            stream_ = other.stream_;
+            buffer_ = move(other.buffer_);
+            offset_ = other.offset_;
+            size_ = other.size_;
+            capacity_ = other.capacity_;
+            other.stream_ = nullptr;
+            other.offset_ = other.size_ = other.capacity_ = 0;
             return *this;
         }
 
         [[nodiscard]]
         constexpr std::string_view string() const
         {
-            return {m_Buffer.get() + m_Offset, m_Size - m_Offset};
+            return {buffer_.get() + offset_, size_ - offset_};
         }
 
         constexpr void consume(size_t size)
         {
-            m_Offset += size;
+            offset_ += size;
         }
 
         bool fill()
         {
-            if (!m_Stream || !*m_Stream)
+            if (!stream_ || !*stream_)
                 return false;
-            if (m_Offset != 0)
+            if (offset_ != 0)
             {
-                std::copy(m_Buffer.get() + m_Offset, m_Buffer.get() + m_Size,
-                          m_Buffer.get());
-                m_Size -= m_Offset;
-                m_Offset = 0;
+                std::copy(buffer_.get() + offset_, buffer_.get() + size_,
+                          buffer_.get());
+                size_ -= offset_;
+                offset_ = 0;
             }
-            else if (m_Size == m_Capacity)
+            else if (size_ == capacity_)
             {
-                m_Capacity = std::max(m_Capacity * 2, DEFAULT_STREAM_BUFFER_CAPACITY);
-                std::unique_ptr<char[]> buffer(new char[m_Capacity]);
-                std::copy(m_Buffer.get(), m_Buffer.get() + m_Size, buffer.get());
-                m_Buffer = move(buffer);
+                capacity_ = std::max(capacity_ * 2, DEFAULT_STREAM_BUFFER_CAPACITY);
+                std::unique_ptr<char[]> buffer(new char[capacity_]);
+                std::copy(buffer_.get(), buffer_.get() + size_, buffer.get());
+                buffer_ = move(buffer);
             }
-            auto bytesToRead = m_Capacity - m_Size;
-            m_Stream->read(m_Buffer.get() + m_Size, bytesToRead);
-            auto bytesRead = size_t(m_Stream->gcount());
-            m_Size += bytesRead;
-            return bytesRead != 0;
+            auto bytes_to_read = capacity_ - size_;
+            stream_->read(buffer_.get() + size_, bytes_to_read);
+            auto bytes_read = size_t(stream_->gcount());
+            size_ += bytes_read;
+            return bytes_read != 0;
         }
     private:
-        std::istream* m_Stream = nullptr;
-        std::unique_ptr<char[]> m_Buffer;
-        size_t m_Offset = 0;
-        size_t m_Size = 0;
-        size_t m_Capacity = 0;
+        std::istream* stream_ = nullptr;
+        std::unique_ptr<char[]> buffer_;
+        size_t offset_ = 0;
+        size_t size_ = 0;
+        size_t capacity_ = 0;
     };
 
     template <typename FindDelimiterFunc>
@@ -155,38 +155,38 @@ namespace ParserTools
         constexpr StreamTokenizerIterator() = default;
 
         constexpr StreamTokenizerIterator(std::istream& stream,
-                                          FindDelimiterFunc findFunc)
-            : m_Buffer(&stream),
-              m_FindDelimiterFunc(findFunc)
+                                          FindDelimiterFunc find_func)
+            : buffer_(&stream),
+              find_delimiter_func_(find_func)
         {
-            bool isFirst = bool(stream);
+            bool is_first = bool(stream);
             operator++();
-            m_IsFirst = isFirst;
+            is_first_ = is_first;
         }
 
         const StreamTokenizerItem& operator*() const
         {
-            return m_Item;
+            return item_;
         }
 
         const StreamTokenizerItem* operator->() const
         {
-            return &m_Item;
+            return &item_;
         }
 
         StreamTokenizerIterator& operator++()
         {
             while (true)
             {
-                auto[s, e] = m_FindDelimiterFunc(m_Buffer.string());
-                if (e != m_Buffer.string().size() || !m_Buffer.fill())
+                auto[s, e] = find_delimiter_func_(buffer_.string());
+                if (e != buffer_.string().size() || !buffer_.fill())
                 {
-                    m_Item = {{m_Buffer.string()}, s, e};
-                    m_Buffer.consume(e);
+                    item_ = {{buffer_.string()}, s, e};
+                    buffer_.consume(e);
                     break;
                 }
             }
-            m_IsFirst = false;
+            is_first_ = false;
             return *this;
         }
 
@@ -199,7 +199,7 @@ namespace ParserTools
         friend constexpr bool
         operator==(const StreamTokenizerIterator& a, const StreamTokenizerIterator& b)
         {
-            return a.m_IsFirst == b.m_IsFirst && !a.m_Item && !b.m_Item;
+            return a.is_first_ == b.is_first_ && !a.item_ && !b.item_;
         }
 
         friend constexpr bool
@@ -209,10 +209,10 @@ namespace ParserTools
         }
 
     private:
-        StreamTokenizerItem m_Item;
-        StreamBuffer m_Buffer;
-        FindDelimiterFunc m_FindDelimiterFunc;
-        bool m_IsFirst = false;
+        StreamTokenizerItem item_;
+        StreamBuffer buffer_;
+        FindDelimiterFunc find_delimiter_func_;
+        bool is_first_ = false;
     };
 
     template <typename FindDelimiterFunc>
@@ -220,18 +220,18 @@ namespace ParserTools
     {
     public:
         StreamTokenizer(std::istream& stream,
-                        FindDelimiterFunc findDelimiterFunc)
-            : m_Stream(&stream),
-              m_FindDelimiterFunc(findDelimiterFunc)
+                        FindDelimiterFunc find_delimiter_func)
+            : stream_(&stream),
+              find_delimiter_func(find_delimiter_func)
         {}
 
         StreamTokenizerIterator<FindDelimiterFunc> begin()
         {
-            if (!m_Stream)
+            if (!stream_)
                 throw std::runtime_error("Can not call begin() more than once.");
-            auto* stream = m_Stream;
-            m_Stream = nullptr;
-            return {*stream, m_FindDelimiterFunc};
+            auto* stream = stream_;
+            stream_ = nullptr;
+            return {*stream, find_delimiter_func};
         }
 
         constexpr StreamTokenizerIterator<FindDelimiterFunc> end() const
@@ -239,15 +239,15 @@ namespace ParserTools
             return {};
         }
     private:
-        std::istream* m_Stream;
-        FindDelimiterFunc m_FindDelimiterFunc;
+        std::istream* stream_;
+        FindDelimiterFunc find_delimiter_func;
     };
 
     template <typename FindDelimiterFunc>
     constexpr StreamTokenizer<FindDelimiterFunc>
-    tokenize(std::istream& stream, FindDelimiterFunc findDelimiterFunc)
+    tokenize(std::istream& stream, FindDelimiterFunc find_delimiter_func)
     {
         using std::move;
-        return {stream, move(findDelimiterFunc)};
+        return {stream, move(find_delimiter_func)};
     }
 }

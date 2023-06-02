@@ -18,45 +18,45 @@ namespace ParserTools
         constexpr StringTokenizerItem() = default;
 
         constexpr StringTokenizerItem(std::string_view str,
-                                      size_t tokenStart, size_t tokenEnd)
-            : m_Str(str),
-              m_TokenStart(tokenStart),
-              m_TokenEnd(tokenEnd)
+                                      size_t token_start, size_t token_end)
+            : str_(str),
+              token_start_(token_start),
+              token_end_(token_end)
         {
-            assert(tokenStart <= tokenEnd);
-            assert(tokenEnd <= str.size());
+            assert(token_start <= token_end);
+            assert(token_end <= str.size());
         }
 
         explicit constexpr operator bool() const
         {
-            return !m_Str.empty();
+            return !str_.empty();
         }
 
         [[nodiscard]]
         constexpr std::string_view string() const
         {
-            return m_Str.substr(0, m_TokenStart);
+            return str_.substr(0, token_start_);
         }
 
         [[nodiscard]]
         constexpr std::string_view token() const
         {
-            return m_Str.substr(m_TokenStart, m_TokenEnd - m_TokenStart);
+            return str_.substr(token_start_, token_end_ - token_start_);
         }
 
         [[nodiscard]]
         constexpr std::string_view remainder() const
         {
-            return m_Str.substr(m_TokenEnd);
+            return str_.substr(token_end_);
         }
 
         friend constexpr bool
         operator==(const StringTokenizerItem& a, const StringTokenizerItem& b)
         {
-            return a.m_TokenStart == b.m_TokenStart
-                   && a.m_TokenEnd == b.m_TokenEnd
-                   && a.m_Str.data() == b.m_Str.data()
-                   && a.m_Str.size() == b.m_Str.size();
+            return a.token_start_ == b.token_start_
+                   && a.token_end_ == b.token_end_
+                   && a.str_.data() == b.str_.data()
+                   && a.str_.size() == b.str_.size();
         }
 
         friend constexpr bool
@@ -65,9 +65,9 @@ namespace ParserTools
             return !(a == b);
         }
     private:
-        std::string_view m_Str;
-        size_t m_TokenStart = 0;
-        size_t m_TokenEnd = 0;
+        std::string_view str_;
+        size_t token_start_ = 0;
+        size_t token_end_ = 0;
     };
 
     template <typename FindDelimiterFunc>
@@ -83,44 +83,44 @@ namespace ParserTools
         constexpr StringTokenizerIterator() = default;
 
         constexpr StringTokenizerIterator(std::string_view str,
-                                          FindDelimiterFunc findFunc)
-            : m_FindDelimiterFunc(findFunc),
-              m_IsFirst(true)
+                                          FindDelimiterFunc find_func)
+            : find_delimiter_func_(find_func),
+              is_first_(true)
         {
-            auto[s, e] = m_FindDelimiterFunc(str);
-            m_Item = {str, s, e};
+            auto [s, e] = find_delimiter_func_(str);
+            item_ = {str, s, e};
         }
 
         const StringTokenizerItem& operator*() const
         {
-            return m_Item;
+            return item_;
         }
 
         const StringTokenizerItem* operator->() const
         {
-            return &m_Item;
+            return &item_;
         }
 
         StringTokenizerIterator& operator++()
         {
-            auto[s, e] = m_FindDelimiterFunc(m_Item.remainder());
-            m_Item = {m_Item.remainder(), s, e};
-            m_IsFirst = false;
+            auto[s, e] = find_delimiter_func_(item_.remainder());
+            item_ = {item_.remainder(), s, e};
+            is_first_ = false;
             return *this;
         }
 
         StringTokenizerIterator operator++(int)
         {
             auto prev = *this;
-            auto[s, e] = m_FindDelimiterFunc(m_Item.remainder());
-            m_Item = {m_Item.remainder(), s, e};
-            m_IsFirst = false;
+            auto [s, e] = find_delimiter_func_(item_.remainder());
+            item_ = {item_.remainder(), s, e};
+            is_first_ = false;
             return prev;
         }
 
         friend constexpr bool operator==(const StringTokenizerIterator& a, const StringTokenizerIterator& b)
         {
-            return a.m_IsFirst == b.m_IsFirst && ((!a.m_Item && !b.m_Item) || (a.m_Item == b.m_Item));
+            return a.is_first_ == b.is_first_ && ((!a.item_ && !b.item_) || (a.item_ == b.item_));
         }
 
         friend constexpr bool operator!=(const StringTokenizerIterator& a, const StringTokenizerIterator& b)
@@ -128,9 +128,9 @@ namespace ParserTools
             return !(a == b);
         }
     private:
-        StringTokenizerItem m_Item;
-        FindDelimiterFunc m_FindDelimiterFunc;
-        bool m_IsFirst = false;
+        StringTokenizerItem item_;
+        FindDelimiterFunc find_delimiter_func_;
+        bool is_first_ = false;
     };
 
     template <typename FindDelimiterFunc>
@@ -138,14 +138,14 @@ namespace ParserTools
     {
     public:
         StringTokenizer(std::string_view str,
-                        FindDelimiterFunc findDelimiterFunc)
-            : m_Str(str),
-              m_FindDelimiterFunc(findDelimiterFunc)
+                        FindDelimiterFunc find_delimiter_func)
+            : str_(str),
+              find_delimiter_func_(find_delimiter_func)
         {}
 
         constexpr StringTokenizerIterator<FindDelimiterFunc> begin() const
         {
-            return {m_Str, m_FindDelimiterFunc};
+            return {str_, find_delimiter_func_};
         }
 
         constexpr StringTokenizerIterator<FindDelimiterFunc> end() const
@@ -153,28 +153,29 @@ namespace ParserTools
             return {};
         }
     private:
-        std::string_view m_Str;
-        FindDelimiterFunc m_FindDelimiterFunc;
+        std::string_view str_;
+        FindDelimiterFunc find_delimiter_func_;
     };
 
     template <typename FindDelimiterFunc>
     constexpr StringTokenizer<FindDelimiterFunc>
-    tokenize(std::string_view str, FindDelimiterFunc findDelimiterFunc)
+    tokenize(std::string_view str, FindDelimiterFunc find_delimiter_func)
     {
         using std::move;
-        return {str, move(findDelimiterFunc)};
+        return {str, move(find_delimiter_func)};
     }
 
     template <typename FindDelimiterFunc>
     std::vector<std::string_view>
-    split(std::string_view str, FindDelimiterFunc findDelimiterFunc, size_t maxSplits = SIZE_MAX)
+    split(std::string_view str, FindDelimiterFunc find_delimiter_func, size_t maxSplits = SIZE_MAX)
     {
         if (maxSplits == 0)
           return {str};
 
         using std::move;
         std::vector<std::string_view> result;
-        for (auto item : tokenize(str, move(findDelimiterFunc)))
+        auto tokenizer = tokenize(str, move(find_delimiter_func));
+        for (auto item : tokenizer)
         {
             result.push_back(item.string());
             if (--maxSplits == 0 || (item.remainder().empty() && !item.token().empty()))

@@ -19,49 +19,49 @@ namespace ParserTools
         StringDelimiterIterator() = default;
 
         StringDelimiterIterator(std::string_view str, FindDelimiterFunc func)
-            : m_Str(str),
-              m_FindDelimiterFunc(func)
+            : str_(str),
+              find_delimiter_func_(func)
         {}
 
         bool next()
         {
-            m_Str = m_Str.substr(m_DelimiterEnd);
-            if (m_Str.empty())
+            str_ = str_.substr(delimiter_end_);
+            if (str_.empty())
             {
-                m_DelimiterStart = m_DelimiterEnd = 0;
+                delimiter_start_ = delimiter_end_ = 0;
                 return false;
             }
-            auto[s, e] = m_FindDelimiterFunc(m_Str);
+            auto[s, e] = find_delimiter_func_(str_);
             assert(s <= e);
-            assert(e <= m_Str.size());
-            m_DelimiterStart = s;
-            m_DelimiterEnd = e;
+            assert(e <= str_.size());
+            delimiter_start_ = s;
+            delimiter_end_ = e;
             return true;
         }
 
         [[nodiscard]]
         std::string_view preceding_substring() const
         {
-            return m_Str.substr(0, m_DelimiterStart);
+            return str_.substr(0, delimiter_start_);
         }
 
         [[nodiscard]]
         std::string_view delimiter() const
         {
-            return m_Str.substr(m_DelimiterStart,
-                                m_DelimiterEnd - m_DelimiterStart);
+            return str_.substr(delimiter_start_,
+                               delimiter_end_ - delimiter_start_);
         }
 
         [[nodiscard]]
         std::string_view remaining_substring() const
         {
-            return m_Str.substr(m_DelimiterEnd);
+            return str_.substr(delimiter_end_);
         }
 
     private:
-        std::string_view m_Str;
-        size_t m_DelimiterStart = 0;
-        size_t m_DelimiterEnd = 0;
-        FindDelimiterFunc m_FindDelimiterFunc;
+        std::string_view str_;
+        size_t delimiter_start_ = 0;
+        size_t delimiter_end_ = 0;
+        FindDelimiterFunc find_delimiter_func_;
     };
 }

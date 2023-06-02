@@ -19,29 +19,29 @@ public:
     StreamDelimiterIterator() = default;
 
     StreamDelimiterIterator(std::istream& stream, FindDelimiterFunc func,
-                            size_t bufferSize = 8192)
-        : m_FindDelimiterFunc(func),
-          m_Buffer(bufferSize),
-          m_Stream(&stream)
+                            size_t buffer_size = 8192)
+        : find_delimiter_func_(func),
+          buffer_(buffer_size),
+          stream_(&stream)
     {}
 
     bool next()
     {
-        m_Str = m_Str.substr(m_DelimiterEnd);
-        if (m_Str.empty() && !fill_buffer())
+        str_ = str_.substr(delimiter_end);
+        if (str_.empty() && !fill_buffer())
         {
-            m_DelimiterStart = m_DelimiterEnd = 0;
+            delimiter_start_ = delimiter_end = 0;
             return false;
         }
         while (true)
         {
-            auto[s, e] = m_FindDelimiterFunc(m_Str);
-            if ((s != e && e != m_Str.size()) || !fill_buffer())
+            auto[s, e] = find_delimiter_func_(str_);
+            if ((s != e && e != str_.size()) || !fill_buffer())
             {
-                assert(e <= m_Str.size());
+                assert(e <= str_.size());
                 assert(s <= e);
-                m_DelimiterStart = s;
-                m_DelimiterEnd = e;
+                delimiter_start_ = s;
+                delimiter_end = e;
                 return true;
             }
         }
@@ -50,51 +50,51 @@ public:
     [[nodiscard]]
     std::string_view preceding_substring() const
     {
-        return m_Str.substr(0, m_DelimiterStart);
+        return str_.substr(0, delimiter_start_);
     }
 
     [[nodiscard]]
     std::string_view delimiter() const
     {
-        return m_Str.substr(m_DelimiterStart,
-                            m_DelimiterEnd - m_DelimiterStart);
+        return str_.substr(delimiter_start_,
+                           delimiter_end - delimiter_start_);
     }
 
     [[nodiscard]]
     std::string_view remaining_buffer() const
     {
-        return m_Str.substr(m_DelimiterEnd);
+        return str_.substr(delimiter_end);
     }
 private:
     bool fill_buffer()
     {
-        if (!m_Stream || !*m_Stream)
+        if (!stream_ || !*stream_)
             return false;
-        if (m_DelimiterEnd != 0)
+        if (delimiter_end != 0)
         {
-            std::copy(m_Buffer.begin() + m_DelimiterEnd, m_Buffer.end(),
-                      m_Buffer.begin());
-            m_Str = {m_Buffer.data(), m_Buffer.size() - m_DelimiterEnd};
-            m_DelimiterStart = m_DelimiterEnd = 0;
+            std::copy(buffer_.begin() + delimiter_end, buffer_.end(),
+                      buffer_.begin());
+            str_ = {buffer_.data(), buffer_.size() - delimiter_end};
+            delimiter_start_ = delimiter_end = 0;
         }
-        else if (m_Str.size() == m_Buffer.size())
+        else if (str_.size() == buffer_.size())
         {
-            auto prevSize = m_Buffer.size();
-            m_Buffer.resize(m_Buffer.size() * 2);
-            m_Str = {m_Buffer.data(), prevSize};
+            auto prev_size = buffer_.size();
+            buffer_.resize(buffer_.size() * 2);
+            str_ = {buffer_.data(), prev_size};
         }
-        auto bytesToRead = m_Buffer.size() - m_Str.size();
-        m_Stream->read(m_Buffer.data() + m_Str.size(), bytesToRead);
-        auto bytesRead = size_t(m_Stream->gcount());
-        m_Buffer.resize(m_Str.size() + bytesRead);
-        m_Str = {m_Buffer.data(), m_Buffer.size()};
-        return bytesRead != 0;
+        auto bytes_to_read = buffer_.size() - str_.size();
+        stream_->read(buffer_.data() + str_.size(), bytes_to_read);
+        auto bytes_read = size_t(stream_->gcount());
+        buffer_.resize(str_.size() + bytes_read);
+        str_ = {buffer_.data(), buffer_.size()};
+        return bytes_read != 0;
     }
 
-    std::istream* m_Stream = nullptr;
-    std::string_view m_Str;
-    size_t m_DelimiterStart = 0;
-    size_t m_DelimiterEnd = 0;
-    std::vector<char> m_Buffer;
-    FindDelimiterFunc m_FindDelimiterFunc;
+    std::istream* stream_ = nullptr;
+    std::string_view str_;
+    size_t delimiter_start_ = 0;
+    size_t delimiter_end = 0;
+    std::vector<char> buffer_;
+    FindDelimiterFunc find_delimiter_func_;
 };
