@@ -16,21 +16,21 @@ TEST_CASE("Comma-separated strings")
     std::string text = "Abc, def, ghi";
     StringDelimiterIterator iterator(text, FindSubstring(", "));
     REQUIRE(iterator.next());
-    REQUIRE(iterator.preceding_substring() == "Abc");
+    REQUIRE(iterator.string() == "Abc");
     REQUIRE(iterator.delimiter() == ", ");
-    REQUIRE(iterator.remaining_substring() == "def, ghi");
+    REQUIRE(iterator.remainder() == "def, ghi");
     REQUIRE(iterator.next());
-    REQUIRE(iterator.preceding_substring() == "def");
+    REQUIRE(iterator.string() == "def");
     REQUIRE(iterator.delimiter() == ", ");
-    REQUIRE(iterator.remaining_substring() == "ghi");
+    REQUIRE(iterator.remainder() == "ghi");
     REQUIRE(iterator.next());
-    REQUIRE(iterator.preceding_substring() == "ghi");
+    REQUIRE(iterator.string() == "ghi");
     REQUIRE(iterator.delimiter().empty());
-    REQUIRE(iterator.remaining_substring().empty());
+    REQUIRE(iterator.remainder().empty());
     REQUIRE(!iterator.next());
-    REQUIRE(iterator.preceding_substring().empty());
+    REQUIRE(iterator.string().empty());
     REQUIRE(iterator.delimiter().empty());
-    REQUIRE(iterator.remaining_substring().empty());
+    REQUIRE(iterator.remainder().empty());
 }
 
 TEST_CASE("String ends on delimiter")
@@ -38,12 +38,12 @@ TEST_CASE("String ends on delimiter")
     std::string text = "Abc, def.";
     StringDelimiterIterator iterator(text, FindSequenceOf(" ,."));
     REQUIRE(iterator.next());
-    REQUIRE(iterator.preceding_substring() == "Abc");
+    REQUIRE(iterator.string() == "Abc");
     REQUIRE(iterator.delimiter() == ", ");
-    REQUIRE(iterator.remaining_substring() == "def.");
+    REQUIRE(iterator.remainder() == "def.");
     REQUIRE(iterator.next());
-    REQUIRE(iterator.preceding_substring() == "def");
+    REQUIRE(iterator.string() == "def");
     REQUIRE(iterator.delimiter() == ".");
-    REQUIRE(iterator.remaining_substring().empty());
+    REQUIRE(iterator.remainder().empty());
     REQUIRE(!iterator.next());
 }

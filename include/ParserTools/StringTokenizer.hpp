@@ -161,8 +161,7 @@ namespace ParserTools
     constexpr StringTokenizer<FindDelimiterFunc>
     tokenize(std::string_view str, FindDelimiterFunc find_delimiter_func)
     {
-        using std::move;
-        return {str, move(find_delimiter_func)};
+        return {str, std::move(find_delimiter_func)};
     }
 
     template <typename FindDelimiterFunc>
@@ -172,9 +171,8 @@ namespace ParserTools
         if (maxSplits == 0)
           return {str};
 
-        using std::move;
         std::vector<std::string_view> result;
-        auto tokenizer = tokenize(str, move(find_delimiter_func));
+        auto tokenizer = tokenize(str, std::move(find_delimiter_func));
         for (auto item : tokenizer)
         {
             result.push_back(item.string());

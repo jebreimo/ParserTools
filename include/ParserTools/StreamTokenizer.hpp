@@ -78,7 +78,7 @@ namespace ParserTools
 
         StreamBuffer(StreamBuffer&& other) noexcept
             : stream_(other.stream_),
-              buffer_(move(other.buffer_)),
+              buffer_(std::move(other.buffer_)),
               offset_(other.offset_),
               size_(other.size_),
               capacity_(other.capacity_)
@@ -90,7 +90,7 @@ namespace ParserTools
         StreamBuffer& operator=(StreamBuffer&& other) noexcept
         {
             stream_ = other.stream_;
-            buffer_ = move(other.buffer_);
+            buffer_ = std::move(other.buffer_);
             offset_ = other.offset_;
             size_ = other.size_;
             capacity_ = other.capacity_;
@@ -114,6 +114,7 @@ namespace ParserTools
         {
             if (!stream_ || !*stream_)
                 return false;
+
             if (offset_ != 0)
             {
                 std::copy(buffer_.get() + offset_, buffer_.get() + size_,
@@ -126,9 +127,10 @@ namespace ParserTools
                 capacity_ = std::max(capacity_ * 2, DEFAULT_STREAM_BUFFER_CAPACITY);
                 std::unique_ptr<char[]> buffer(new char[capacity_]);
                 std::copy(buffer_.get(), buffer_.get() + size_, buffer.get());
-                buffer_ = move(buffer);
+                buffer_ = std::move(buffer);
             }
-            auto bytes_to_read = capacity_ - size_;
+
+            auto bytes_to_read = std::streamsize(capacity_ - size_);
             stream_->read(buffer_.get() + size_, bytes_to_read);
             auto bytes_read = size_t(stream_->gcount());
             size_ += bytes_read;

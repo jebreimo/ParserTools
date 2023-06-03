@@ -20,7 +20,7 @@ public:
 
     StreamDelimiterIterator(std::istream& stream, FindDelimiterFunc func,
                             size_t buffer_size = 8192)
-        : find_delimiter_func_(func),
+        : find_delimiter_func_(std::move(func)),
           buffer_(buffer_size),
           stream_(&stream)
     {}
@@ -33,6 +33,7 @@ public:
             delimiter_start_ = delimiter_end = 0;
             return false;
         }
+
         while (true)
         {
             auto[s, e] = find_delimiter_func_(str_);
@@ -70,6 +71,7 @@ private:
     {
         if (!stream_ || !*stream_)
             return false;
+
         if (delimiter_end != 0)
         {
             std::copy(buffer_.begin() + delimiter_end, buffer_.end(),
@@ -83,7 +85,8 @@ private:
             buffer_.resize(buffer_.size() * 2);
             str_ = {buffer_.data(), prev_size};
         }
-        auto bytes_to_read = buffer_.size() - str_.size();
+
+        auto bytes_to_read = std::streamsize(buffer_.size() - str_.size());
         stream_->read(buffer_.data() + str_.size(), bytes_to_read);
         auto bytes_read = size_t(stream_->gcount());
         buffer_.resize(str_.size() + bytes_read);

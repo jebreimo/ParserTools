@@ -20,7 +20,7 @@ namespace ParserTools
 
         StringDelimiterIterator(std::string_view str, FindDelimiterFunc func)
             : str_(str),
-              find_delimiter_func_(func)
+              find_delimiter_func_(std::move(func))
         {}
 
         bool next()
@@ -31,7 +31,8 @@ namespace ParserTools
                 delimiter_start_ = delimiter_end_ = 0;
                 return false;
             }
-            auto[s, e] = find_delimiter_func_(str_);
+
+            auto [s, e] = find_delimiter_func_(str_);
             assert(s <= e);
             assert(e <= str_.size());
             delimiter_start_ = s;
@@ -39,8 +40,13 @@ namespace ParserTools
             return true;
         }
 
+        /**
+         * @brief Returns the substring between the previous delimiter
+         *  and the current delimiter, or the start of the string and the
+         *  current delimiter if there is no previous delimiter.
+         */
         [[nodiscard]]
-        std::string_view preceding_substring() const
+        std::string_view string() const
         {
             return str_.substr(0, delimiter_start_);
         }
@@ -53,7 +59,7 @@ namespace ParserTools
         }
 
         [[nodiscard]]
-        std::string_view remaining_substring() const
+        std::string_view remainder() const
         {
             return str_.substr(delimiter_end_);
         }
