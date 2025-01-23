@@ -6,7 +6,10 @@
 // License text is included with the source distribution.
 //****************************************************************************
 #include "ParserTools/ParseFloatingPoint.hpp"
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+using Catch::Matchers::WithinAbs;
 
 TEST_CASE("parse_floating_point")
 {
@@ -73,37 +76,37 @@ TEST_CASE("parse_floating_point")
     REQUIRE(!v);
     v = ParserTools::parse_floating_point<double>("1234.5678e222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(1234.5678e222).margin(1e215));
+    REQUIRE_THAT(*v, WithinAbs(1234.5678e222, 1e215));
     v = ParserTools::parse_floating_point<double>("1234.5678e-222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(1234.5678e-222).margin(1e-225));
+    REQUIRE_THAT(*v, WithinAbs(1234.5678e-222, 1e-225));
     v = ParserTools::parse_floating_point<double>("1234.5678e+222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(1234.5678e222).margin(1e215));
+    REQUIRE_THAT(*v, WithinAbs(1234.5678e222, 1e215));
     v = ParserTools::parse_floating_point<double>("-1234.5678e222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(-1234.5678e222).margin(1e215));
+    REQUIRE_THAT(*v, WithinAbs(-1234.5678e222, 1e215));
     v = ParserTools::parse_floating_point<double>("-1234.5678e-222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(-1234.5678e-222).margin(1e-225));
+    REQUIRE_THAT(*v, WithinAbs(-1234.5678e-222, 1e-225));
     v = ParserTools::parse_floating_point<double>("-1234.5678e+222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(-1234.5678e222).margin(1e215));
+    REQUIRE_THAT(*v, WithinAbs(-1234.5678e222, 1e215));
     v = ParserTools::parse_floating_point<double>("-1234.5678e+222");
     REQUIRE(v);
-    REQUIRE(*v == Approx(-1234.5678e222).margin(1e215));
+    REQUIRE_THAT(*v, WithinAbs(-1234.5678e222, 1e215));
     v = ParserTools::parse_floating_point<double>("2.2250738585072014e-308");
     REQUIRE(v);
-    REQUIRE(*v == Approx(2.2250738585072014e-308).margin(1e-318));
+    REQUIRE_THAT(*v, WithinAbs(2.2250738585072014e-308, 1e-318));
     v = ParserTools::parse_floating_point<double>("2.2250739e-308");
     REQUIRE(v);
-    REQUIRE(*v == Approx(2.2250739e-308).margin(1e-318));
+    REQUIRE_THAT(*v, WithinAbs(2.2250739e-308, 1e-318));
     v = ParserTools::parse_floating_point<double>("1.7976931348623157e+308");
     REQUIRE(v);
     REQUIRE(*v == 1.7976931348623157e+308);
     v = ParserTools::parse_floating_point<double>("1e308");
     REQUIRE(v);
-    REQUIRE(*v == Approx(1e308).margin(1e298));
+    REQUIRE_THAT(*v, WithinAbs(1e308, 1e298));
     v = ParserTools::parse_floating_point<double>("1e309");
     REQUIRE(!v);
     v = ParserTools::parse_floating_point<double>("1e-307");
