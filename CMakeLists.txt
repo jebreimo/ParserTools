@@ -23,17 +23,34 @@ option(PARSERTOOLS_BUILD_TEST "Build tests" ${PARSERTOOLS_MASTER_PROJECT})
 # Install option
 option(PARSERTOOLS_INSTALL "Generate the install target" ${PARSERTOOLS_MASTER_PROJECT})
 
-set(CMAKE_CXX_STANDARD 17)
+find_package(expat CONFIG REQUIRED)
+
+set(CMAKE_CXX_STANDARD 20)
 
 include(GNUInstallDirs)
 
-add_library(ParserTools INTERFACE)
+add_library(ParserTools
+    include/ParserTools/DelimiterFinders.hpp
+    include/ParserTools/ParseFloatingPoint.hpp
+    include/ParserTools/ParseInteger.hpp
+    include/ParserTools/SaxyParser.hpp
+    include/ParserTools/StreamDelimiterIterator.hpp
+    include/ParserTools/StreamTokenizer.hpp
+    include/ParserTools/StringDelimiterIterator.hpp
+    include/ParserTools/StringTokenizer.hpp
+    src/ParserTools/SaxyParser.cpp
+)
 
 target_include_directories(ParserTools
-    INTERFACE
+    PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    )
+)
+
+target_link_libraries(ParserTools
+    PUBLIC
+        expat::expat
+)
 
 add_library(ParserTools::ParserTools ALIAS ParserTools)
 
