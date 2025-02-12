@@ -14,12 +14,12 @@
 
 /**
  * @file
- * @brief Defines the SaxyParser class.
+ * @brief Defines the SaxPatParser class.
  *
- * SaxyParser is a SAX-like XML parser_.
+ * SaxPatParser is a thin SAX-like wrapper around the Expat XML parser.
  */
 
-// Forward declaration of Expat's parser_ struct.
+// Forward declaration of Expat's parser struct.
 struct XML_ParserStruct;
 
 namespace ParserTools
@@ -40,11 +40,14 @@ namespace ParserTools
         virtual ~ElementHandler() = default;
 
         virtual void start_element(std::string_view name,
-                                   const Attributes& attributes) = 0;
+                                   const Attributes& attributes)
+        {}
 
-        virtual void end_element(std::string_view name) = 0;
+        virtual void end_element(std::string_view name)
+        {}
 
-        virtual void character_data(std::string_view text) = 0;
+        virtual void character_data(std::string_view text)
+        {}
     };
 
     namespace Details
@@ -57,28 +60,32 @@ namespace ParserTools
      *
      * The parser is a fairly thin wrapper around Expat.
      */
-    class SaxyParser
+    class SaxPatParser
     {
     public:
-        SaxyParser();
+        SaxPatParser();
 
-        explicit SaxyParser(ElementHandler& handler);
+        explicit SaxPatParser(ElementHandler& handler);
 
-        SaxyParser(const SaxyParser&) = delete;
+        SaxPatParser(const SaxPatParser&) = delete;
 
-        SaxyParser(SaxyParser&&) noexcept;
+        SaxPatParser(SaxPatParser&&) noexcept;
 
-        SaxyParser& operator=(const SaxyParser&) = delete;
+        SaxPatParser& operator=(const SaxPatParser&) = delete;
 
-        SaxyParser& operator=(SaxyParser&&) noexcept;
+        SaxPatParser& operator=(SaxPatParser&&) noexcept;
 
-        ~SaxyParser();
+        ~SaxPatParser();
 
         void parse(const std::string_view& xml, bool is_final = true);
 
         void parse(const void* data, size_t size, bool is_final = true);
 
         void parse(std::istream& stream);
+
+        void stop(bool resumable = false);
+
+        void reset();
 
         [[nodiscard]] ElementHandler* handler() const;
 
@@ -93,7 +100,7 @@ namespace ParserTools
         std::unique_ptr<Details::ParserContext> context_;
     };
 
-    class SaxyException : public std::runtime_error
+    class SaxPatException : public std::runtime_error
     {
     public:
         using std::runtime_error::runtime_error;
@@ -103,16 +110,16 @@ namespace ParserTools
                                    std::string_view name);
 
     #ifdef _MSC_VER
-        #define EXPAT_THROW_2_(file, line, msg) \
-            throw ::ParserTools::SaxyException(file "(" #line "): " msg)
+        #define SAXPAT_THROW_2_(file, line, msg) \
+            throw ::ParserTools::SaxPatException(file "(" #line "): " msg)
     #else
-        #define EXPAT_THROW_2_(file, line, msg) \
-            throw ::XmlUtils::SaxyException(file ":" #line ": " msg)
+        #define SAXPAT_THROW_2_(file, line, msg) \
+            throw ::ParserTools::SaxPatException(file ":" #line ": " msg)
     #endif
 
-    #define EXPAT_THROW_1_(file, line, msg) \
-        EXPAT_THROW_2_(file, line, msg)
+    #define SAXPAT_THROW_1_(file, line, msg) \
+        SAXPAT_THROW_2_(file, line, msg)
 
-    #define EXPAT_THROW(msg) \
-        EXPAT_THROW_1_(__FILE__, __LINE__, msg)
+    #define SAXPAT_THROW(msg) \
+        SAXPAT_THROW_1_(__FILE__, __LINE__, msg)
 }

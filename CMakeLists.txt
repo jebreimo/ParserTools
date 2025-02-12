@@ -33,12 +33,12 @@ add_library(ParserTools
     include/ParserTools/DelimiterFinders.hpp
     include/ParserTools/ParseFloatingPoint.hpp
     include/ParserTools/ParseInteger.hpp
-    include/ParserTools/SaxyParser.hpp
+    include/ParserTools/SaxPatParser.hpp
     include/ParserTools/StreamDelimiterIterator.hpp
     include/ParserTools/StreamTokenizer.hpp
     include/ParserTools/StringDelimiterIterator.hpp
     include/ParserTools/StringTokenizer.hpp
-    src/ParserTools/SaxyParser.cpp
+    src/ParserTools/SaxPatParser.cpp
 )
 
 target_include_directories(ParserTools

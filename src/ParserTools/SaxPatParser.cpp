@@ -5,7 +5,7 @@
 // This file is distributed under the Zero-Clause BSD License.
 // License text is included with the source distribution.
 //****************************************************************************
-#include "ParserTools/SaxyParser.hpp"
+#include "ParserTools/SaxPatParser.hpp"
 #include <algorithm>
 #include <fstream>
 #include <string>
@@ -61,6 +61,13 @@ namespace ParserTools
             return count;
         }
 
+        std::string get_error_message(XML_ParserStruct* parser)
+        {
+            auto error = XML_ErrorString(XML_GetErrorCode(parser));
+            auto error_line = XML_GetCurrentLineNumber(parser);
+            return std::string(error) + " [line " + std::to_string(error_line) + "]";
+        }
+
         void XMLCALL start_element_handler(void* user_data,
                                            const XML_Char* name,
                                            const XML_Char** attributes)
@@ -95,37 +102,42 @@ namespace ParserTools
             context.buffer.append(s, size_t(len));
         }
 
-        XML_Parser create_parser(Details::ParserContext& context)
+        void set_up_parser(XML_Parser parser, Details::ParserContext& context)
         {
-            auto parser = XML_ParserCreate("UTF-8");
-            if (!parser)
-                EXPAT_THROW("Failed to create XML parser_.");
             XML_SetUserData(parser, &context);
             XML_SetElementHandler(parser,
                                   start_element_handler,
                                   end_element_handler);
             XML_SetCharacterDataHandler(parser,
                                         character_data_handler);
+        }
+
+        XML_Parser create_parser(Details::ParserContext& context)
+        {
+            auto parser = XML_ParserCreate("UTF-8");
+            if (!parser)
+                SAXPAT_THROW("Failed to create XML parser_.");
+            set_up_parser(parser, context);
             return parser;
         }
     }
 
-    SaxyParser::SaxyParser() = default;
+    SaxPatParser::SaxPatParser() = default;
 
-    SaxyParser::SaxyParser(ElementHandler& handler)
+    SaxPatParser::SaxPatParser(ElementHandler& handler)
         : context_(std::make_unique<Details::ParserContext>())
     {
         context_->parser = create_parser(*context_);
         context_->handler = &handler;
     }
 
-    SaxyParser::SaxyParser(SaxyParser&&) noexcept = default;
+    SaxPatParser::SaxPatParser(SaxPatParser&&) noexcept = default;
 
-    SaxyParser& SaxyParser::operator=(SaxyParser&&) noexcept = default;
+    SaxPatParser& SaxPatParser::operator=(SaxPatParser&&) noexcept = default;
 
-    SaxyParser::~SaxyParser() = default;
+    SaxPatParser::~SaxPatParser() = default;
 
-    void SaxyParser::parse(const std::string_view& xml, bool is_final)
+    void SaxPatParser::parse(const std::string_view& xml, bool is_final)
     {
         if (xml.empty() && is_final)
         {
@@ -141,25 +153,23 @@ namespace ParserTools
         }
     }
 
-    void SaxyParser::parse(const void* data, size_t size, bool is_final)
+    void SaxPatParser::parse(const void* data, size_t size, bool is_final)
     {
         if (!context_ || !context_->handler)
-            EXPAT_THROW("Parser has no handler.");
+            SAXPAT_THROW("Parser has no handler.");
 
         if (!context_->parser)
             context_->parser = create_parser(*context_);
 
         if (XML_Parse(context_->parser, static_cast<const char*>(data),
-                      int(size), is_final) == XML_STATUS_ERROR)
+                      int(size), is_final) == XML_STATUS_ERROR
+            && XML_GetErrorCode(context_->parser) != XML_ERROR_ABORTED)
         {
-            auto error = XML_ErrorString(XML_GetErrorCode(context_->parser));
-            auto error_line = XML_GetCurrentLineNumber(context_->parser);
-            EXPAT_THROW(+ std::string(error) + " [line "
-                        + std::to_string(error_line) + "]");
+              SAXPAT_THROW(+ get_error_message(context_->parser));
         }
     }
 
-    void SaxyParser::parse(std::istream& stream)
+    void SaxPatParser::parse(std::istream& stream)
     {
         constexpr size_t CHUNK_SIZE = 16 * 1024;
         std::vector<char> buffer(CHUNK_SIZE);
@@ -174,12 +184,32 @@ namespace ParserTools
         }
     }
 
-    ElementHandler* SaxyParser::handler() const
+    void SaxPatParser::stop(bool resumable)
+    {
+        if (!context_)
+            return;
+
+        if (XML_StopParser(context_->parser, resumable ? 1 : 0) == XML_STATUS_ERROR)
+            SAXPAT_THROW(+ get_error_message(context_->parser));
+    }
+
+    void SaxPatParser::reset()
+    {
+        if (!context_)
+            return;
+
+        if (XML_ParserReset(context_->parser, nullptr))
+            SAXPAT_THROW("Can't reset parser.");
+
+        set_up_parser(context_->parser, *context_);
+    }
+
+    ElementHandler* SaxPatParser::handler() const
     {
         return context_ ? context_->handler : nullptr;
     }
 
-    ElementHandler* SaxyParser::set_handler(ElementHandler* handler)
+    ElementHandler* SaxPatParser::set_handler(ElementHandler* handler)
     {
         if (!context_ && !handler)
             return nullptr;
@@ -192,19 +222,19 @@ namespace ParserTools
         return old_handler;
     }
 
-    bool SaxyParser::ignore_whitespace() const
+    bool SaxPatParser::ignore_whitespace() const
     {
         return !context_ || context_->ignore_whitespace;
     }
 
-    void SaxyParser::set_ignore_whitespace(bool value)
+    void SaxPatParser::set_ignore_whitespace(bool value)
     {
         if (!context_)
             context_ = std::make_unique<Details::ParserContext>();
         context_->ignore_whitespace = value;
     }
 
-    XML_ParserStruct* SaxyParser::expat_parser() const
+    XML_ParserStruct* SaxPatParser::expat_parser() const
     {
         return context_ ? context_->parser : nullptr;
     }
