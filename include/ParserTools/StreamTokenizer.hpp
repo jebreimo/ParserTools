@@ -249,7 +249,6 @@ namespace ParserTools
     constexpr StreamTokenizer<FindDelimiterFunc>
     tokenize(std::istream& stream, FindDelimiterFunc find_delimiter_func)
     {
-        using std::move;
-        return {stream, move(find_delimiter_func)};
+        return {stream, std::move(find_delimiter_func)};
     }
 }

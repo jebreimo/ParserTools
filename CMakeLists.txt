@@ -23,7 +23,7 @@ option(PARSERTOOLS_BUILD_TEST "Build tests" ${PARSERTOOLS_MASTER_PROJECT})
 # Install option
 option(PARSERTOOLS_INSTALL "Generate the install target" ${PARSERTOOLS_MASTER_PROJECT})
 
-find_package(expat CONFIG REQUIRED)
+find_package(EXPAT REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -49,7 +49,7 @@ target_include_directories(ParserTools
 
 target_link_libraries(ParserTools
     PUBLIC
-        expat::expat
+        EXPAT::EXPAT
 )
 
 add_library(ParserTools::ParserTools ALIAS ParserTools)
