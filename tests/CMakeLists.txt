@@ -11,7 +11,7 @@ include(FetchContent)
 FetchContent_Declare(catch
     GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
     GIT_TAG "v3.8.0"
-    )
+)
 FetchContent_MakeAvailable(catch)
 
 add_executable(ParserToolsTest
@@ -21,10 +21,10 @@ add_executable(ParserToolsTest
     test_StreamTokenizer.cpp
     test_StringDelimiterIterator.cpp
     test_StringTokenizer.cpp
-    )
+)
 
 target_link_libraries(ParserToolsTest
     PRIVATE
         ParserTools::ParserTools
         Catch2::Catch2WithMain
-    )
+)

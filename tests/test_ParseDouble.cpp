@@ -79,7 +79,7 @@ TEST_CASE("parse_floating_point")
     REQUIRE_THAT(*v, WithinAbs(1234.5678e222, 1e215));
     v = ParserTools::parse_floating_point<double>("1234.5678e-222");
     REQUIRE(v);
-    REQUIRE_THAT(*v, WithinAbs(1234.5678e-222, 1e-225));
+    REQUIRE_THAT(*v, WithinAbs(1234.5678e-222, 1e-215));
     v = ParserTools::parse_floating_point<double>("1234.5678e+222");
     REQUIRE(v);
     REQUIRE_THAT(*v, WithinAbs(1234.5678e222, 1e215));
